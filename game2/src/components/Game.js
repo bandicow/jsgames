@@ -10,6 +10,9 @@ function Game() {
   const gameEngineRef = useRef(null);
   const [gameState, setGameState] = useState('menu');
   const [language, setLanguage] = useState(i18n.getLanguage());
+  const [selectedStage, setSelectedStage] = useState(0); // 0 = Forest (default)
+  const [selectedDuration, setSelectedDuration] = useState(600); // 10 minutes default
+  const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
     if (canvasRef.current && !gameEngineRef.current) {
@@ -40,9 +43,24 @@ function Game() {
 
   const startGame = () => {
     if (gameEngineRef.current) {
+      console.log(`Starting new game - Stage: ${selectedStage}, Duration: ${selectedDuration}s`);
+      
+      // Apply settings before starting
+      gameEngineRef.current.setGameSettings({
+        startStage: selectedStage,
+        gameDuration: selectedDuration
+      });
+      
+      // Force complete reset
       gameEngineRef.current.init();
-      gameEngineRef.current.start();
-      setGameState('playing');
+      
+      // Small delay to ensure init() completes
+      setTimeout(() => {
+        gameEngineRef.current.start();
+        setGameState('playing');
+      }, 50);
+      
+      setShowSettings(false);
     }
   };
 
@@ -52,9 +70,22 @@ function Game() {
 
   const restartGame = () => {
     if (gameEngineRef.current) {
+      console.log(`Restarting game - Stage: ${selectedStage}, Duration: ${selectedDuration}s`);
+      
+      // Apply settings before restarting
+      gameEngineRef.current.setGameSettings({
+        startStage: selectedStage,
+        gameDuration: selectedDuration
+      });
+      
+      // Force complete reset
       gameEngineRef.current.init();
-      gameEngineRef.current.start();
-      setGameState('playing');
+      
+      // Small delay to ensure init() completes
+      setTimeout(() => {
+        gameEngineRef.current.start();
+        setGameState('playing');
+      }, 50);
     }
   };
 
@@ -83,6 +114,41 @@ function Game() {
             <button className="start-btn" onClick={startGame}>
               {i18n.t('game.start')}
             </button>
+            
+            <button className="settings-btn" onClick={() => setShowSettings(!showSettings)}>
+              {i18n.t('game.settings') || 'Settings'}
+            </button>
+            
+            {showSettings && (
+              <div className="settings-panel">
+                <h3>{i18n.t('game.settings') || 'Game Settings'}</h3>
+                
+                <div className="setting-group">
+                  <label>{i18n.t('game.stage.select') || 'Start Stage'}:</label>
+                  <select value={selectedStage} onChange={(e) => setSelectedStage(Number(e.target.value))}>
+                    <option value={0}>{i18n.t('game.stage.forest') || 'Forest'}</option>
+                    <option value={1}>{i18n.t('game.stage.desert') || 'Desert'}</option>
+                    <option value={2}>{i18n.t('game.stage.volcano') || 'Volcano'}</option>
+                    <option value={3}>{i18n.t('game.stage.snow') || 'Snow'}</option>
+                    <option value={4}>{i18n.t('game.stage.space') || 'Space'}</option>
+                  </select>
+                </div>
+                
+                <div className="setting-group">
+                  <label>{i18n.t('game.duration') || 'Game Duration'}:</label>
+                  <select value={selectedDuration} onChange={(e) => setSelectedDuration(Number(e.target.value))}>
+                    <option value={60}>1 {i18n.t('game.minute') || 'minute'}</option>
+                    <option value={180}>3 {i18n.t('game.minutes') || 'minutes'}</option>
+                    <option value={300}>5 {i18n.t('game.minutes') || 'minutes'}</option>
+                    <option value={600}>10 {i18n.t('game.minutes') || 'minutes'}</option>
+                  </select>
+                </div>
+                
+                <p className="settings-note">
+                  {i18n.t('game.boss.note') || 'Boss spawns 1 minute before game ends'}
+                </p>
+              </div>
+            )}
             
             <div className="controls-info">
               <h3>Controls</h3>

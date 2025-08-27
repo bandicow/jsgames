@@ -31,6 +31,10 @@ export default class GameEngine {
     this.ctx = canvas.getContext('2d');
     this.i18n = i18n || { t: (key) => key }; // Fallback if i18n not provided
     
+    // Custom settings
+    this.customDuration = null;
+    this.customStartStage = null;
+    
     // Game state
     this.gameState = 'menu'; // menu, playing, paused, levelup, gameover, victory
     this.gameTime = 0;
@@ -79,6 +83,11 @@ export default class GameEngine {
   }
 
   init() {
+    console.log('GameEngine init() called - resetting all timers');
+    
+    // FORCE complete reset of game state
+    this.gameState = 'menu';
+    
     // Set canvas size
     this.canvas.width = GAME_CONFIG.CANVAS_WIDTH;
     this.canvas.height = GAME_CONFIG.CANVAS_HEIGHT;
@@ -98,23 +107,41 @@ export default class GameEngine {
     this.barrels = [];
     this.obstacles = [];
     this.particles = [];
+    this.damageNumbers = [];
+    
+    // Apply custom stage if set
+    if (this.customStartStage !== null) {
+      this.currentStage = this.customStartStage;
+      console.log(`Applied custom stage: ${this.customStartStage} (${STAGE_CONFIG.STAGES[this.customStartStage]})`);
+    } else {
+      this.currentStage = 0;
+      console.log('Using default stage progression');
+    }
     
     // Spawn initial obstacles for the stage
     this.spawnStageObstacles();
     
-    // Reset timers
+    // FORCE reset all timers to exactly 0
     this.gameTime = 0;
     this.stageTime = 0;
-    this.currentStage = 0;
     this.enemySpawnTimer = 0;
     this.barrelSpawnTimer = 0;
     this.miniBossTimer = 0;
     this.bossSpawned = false;
+    this.miniBossSpawned = false;
+    this.wave = 1;
+    this.lastTime = 0;
+    this.deltaTime = 0;
+    this.fpsTimer = 0;
+    this.frameCount = 0;
     
     // Reset effects
     this.freezeTime = 0;
     this.magnetTime = 0;
     this.screenShake = 0;
+    
+    // Log to confirm reset
+    console.log(`Timer reset complete - GameTime: ${this.gameTime}, Duration: ${this.getGameDuration()}`);
     
     // Setup input handlers
     this.setupInputHandlers();
@@ -228,6 +255,19 @@ export default class GameEngine {
     this.lastTime = performance.now();
     this.gameLoop();
   }
+  
+  setGameSettings(settings) {
+    if (settings.gameDuration !== undefined) {
+      this.customDuration = settings.gameDuration;
+    }
+    if (settings.startStage !== undefined) {
+      this.customStartStage = settings.startStage;
+    }
+  }
+  
+  getGameDuration() {
+    return this.customDuration || GAME_CONFIG.GAME_DURATION;
+  }
 
   gameLoop(currentTime = 0) {
     // Calculate delta time
@@ -259,14 +299,15 @@ export default class GameEngine {
     this.gameTime += deltaTime / 1000;
     this.stageTime += deltaTime / 1000;
     
-    // Check stage progression
-    this.updateStage();
-    
-    // Check victory condition
-    if (this.gameTime >= GAME_CONFIG.GAME_DURATION) {
+    // Check for victory
+    const gameDuration = this.getGameDuration();
+    if (this.gameTime >= gameDuration) {
       this.gameState = 'victory';
       return;
     }
+    
+    // Check stage progression
+    this.updateStage();
     
     // Update effects
     if (this.freezeTime > 0) {
@@ -541,22 +582,27 @@ export default class GameEngine {
   }
 
   updateStage() {
-    // Calculate current stage based on time
-    const newStage = Math.min(
-      Math.floor(this.stageTime / STAGE_CONFIG.STAGE_DURATION),
-      STAGE_CONFIG.STAGES.length - 1
-    );
-    
-    if (newStage !== this.currentStage) {
-      this.currentStage = newStage;
-      this.stageTime = 0;
+    // Only auto-progress stages if no custom stage is set
+    if (this.customStartStage === null) {
+      // Calculate current stage based on time
+      const newStage = Math.min(
+        Math.floor(this.stageTime / STAGE_CONFIG.STAGE_DURATION),
+        STAGE_CONFIG.STAGES.length - 1
+      );
       
-      // Increase difficulty
-      this.enemySpawnRate *= 0.8; // Spawn faster
-      
-      // Clear old obstacles and spawn new ones for the stage
-      this.obstacles = [];
-      this.spawnStageObstacles();
+      if (newStage !== this.currentStage) {
+        this.currentStage = newStage;
+        this.stageTime = 0;
+        
+        // Increase difficulty
+        this.enemySpawnRate *= 0.8; // Spawn faster
+        
+        // Clear old obstacles and spawn new ones for the stage
+        this.obstacles = [];
+        this.spawnStageObstacles();
+      }
+    } else {
+      // Custom stage selected - keep it fixed (no logging to avoid spam)
     }
     
     // Spawn mini-boss at 5 minutes
@@ -565,8 +611,17 @@ export default class GameEngine {
       this.miniBossSpawned = true;
     }
     
-    // Spawn final boss at 10 minutes
-    if (this.gameTime >= 590 && !this.bossSpawned) {
+    // Spawn boss 1 minute before game ends
+    const gameDuration = this.getGameDuration();
+    const bossSpawnTime = Math.max(30, gameDuration - 60); // Boss spawns 1 min before end, but not before 30s
+    
+    // Debug: Log boss spawn conditions for troubleshooting
+    if (this.gameTime > 25 && this.gameTime < 35 && !this.bossSpawned) {
+      console.log(`Boss Debug - GameTime: ${this.gameTime}, Duration: ${gameDuration}, BossSpawnTime: ${bossSpawnTime}, BossSpawned: ${this.bossSpawned}`);
+    }
+    
+    if (!this.bossSpawned && this.gameTime >= bossSpawnTime) {
+      console.log(`Spawning boss at ${this.gameTime} seconds (spawn time: ${bossSpawnTime})`);
       this.spawnBoss();
       this.bossSpawned = true;
     }
@@ -600,6 +655,7 @@ export default class GameEngine {
     if (this.enemySpawnTimer >= currentSpawnRate && 
         this.enemies.length < maxEnemies) {
       this.enemySpawnTimer = 0;
+      this.wave = Math.floor(this.gameTime / 30) + 1; // Update wave counter
       
       // Spawn 1-3 enemies at once later in game
       let spawnCount = 1;
@@ -1117,7 +1173,8 @@ export default class GameEngine {
     this.ctx.textAlign = 'right';
     this.ctx.fillText(`${this.i18n.t('game.score')}: ${this.player.score}`, this.canvas.width - 20, 30);
     
-    const timeRemaining = Math.max(0, GAME_CONFIG.GAME_DURATION - this.gameTime);
+    const gameDuration = this.getGameDuration();
+    const timeRemaining = Math.max(0, gameDuration - this.gameTime);
     const minutes = Math.floor(timeRemaining / 60);
     const seconds = Math.floor(timeRemaining % 60);
     this.ctx.fillText(`${this.i18n.t('game.time')}: ${minutes}:${seconds.toString().padStart(2, '0')}`, this.canvas.width - 20, 60);
