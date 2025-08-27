@@ -1,0 +1,83 @@
+{
+  "game": {
+    "title": "뱀 서바이벌",
+    "start": "게임 시작",
+    "pause": "일시정지",
+    "paused": "일시정지됨",
+    "pressEscToResume": "ESC를 눌러 계속하기",
+    "resume": "계속하기",
+    "gameOver": "게임 오버",
+    "victory": "승리!",
+    "score": "점수",
+    "time": "시간",
+    "level": "레벨",
+    "levelUp": "레벨 업!",
+    "hp": "HP",
+    "exp": "경험치",
+    "selectUpgrade": "업그레이드 선택",
+    "chooseUpgrade": "업그레이드를 선택하세요",
+    "finalScore": "최종 점수",
+    "survivalTime": "생존 시간",
+    "boss": "보스",
+    "passive": "패시브 업그레이드",
+    "instant": "즉시 효과",
+    "pressEnterToSelect": "ENTER를 눌러 선택",
+    "pressRToRestart": "R 또는 ENTER를 눌러 다시 시작",
+    "language": "언어",
+    "stage": {
+      "forest": "숲",
+      "desert": "황야",
+      "volcano": "화산",
+      "snow": "설원",
+      "space": "우주"
+    }
+  },
+  "weapons": {
+    "bullet": "총알",
+    "sword": "검",
+    "lightning": "번개",
+    "spear": "창",
+    "blade": "칼날",
+    "laser": "레이저",
+    "shotgun": "산탄총",
+    "missile": "유도 미사일",
+    "ice": "얼음 파편",
+    "shockwave": "충격파",
+    "boomerang": "부메랑",
+    "poison": "독장판"
+  },
+  "passives": {
+    "maxHp": "최대 HP +20%",
+    "hpRegen": "HP 재생 +1/초",
+    "speed": "이동 속도 +20%",
+    "damage": "공격력 +25%",
+    "cooldown": "쿨타임 -20%",
+    "expGain": "경험치 획득 +30%",
+    "pickupRange": "획득 거리 +50%",
+    "weaponSize": "무기 크기 +30%",
+    "damageReduction": "받는 데미지 -20%",
+    "weaponCount": "무기 개수 +1"
+  },
+  "items": {
+    "heal": "50% 회복",
+    "magnet": "자석",
+    "powerUp": "파워업",
+    "coin": "동전",
+    "freeze": "빙결",
+    "shield": "쉴드"
+  },
+  "descriptions": {
+    "bullet": "앞으로 발사",
+    "sword": "앞 베기",
+    "lightning": "랜덤 적에게 낙뢰",
+    "spear": "관통 발사체",
+    "blade": "플레이어 주변 회전",
+    "laser": "직선 관통 공격",
+    "shotgun": "부채꼴 다발 발사",
+    "missile": "적 추적",
+    "ice": "적 속도 감소",
+    "shockwave": "원형 범위 공격",
+    "boomerang": "공격 후 돌아옴",
+    "poison": "독 웅덩이 생성"
+  }
+}

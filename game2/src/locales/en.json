@@ -1,0 +1,83 @@
+{
+  "game": {
+    "title": "Vam Survivors",
+    "start": "Start Game",
+    "pause": "Pause",
+    "paused": "PAUSED",
+    "pressEscToResume": "Press ESC to Resume",
+    "resume": "Resume",
+    "gameOver": "GAME OVER",
+    "victory": "VICTORY!",
+    "score": "Score",
+    "time": "Time",
+    "level": "Level",
+    "levelUp": "LEVEL UP!",
+    "hp": "HP",
+    "exp": "EXP",
+    "selectUpgrade": "Choose Upgrade",
+    "chooseUpgrade": "Choose an upgrade",
+    "finalScore": "Final Score",
+    "survivalTime": "Survival Time",
+    "boss": "BOSS",
+    "passive": "Passive Upgrade",
+    "instant": "Instant Effect",
+    "pressEnterToSelect": "Press ENTER to select",
+    "pressRToRestart": "Press R or ENTER to Restart",
+    "language": "Language",
+    "stage": {
+      "forest": "Forest",
+      "desert": "Desert",
+      "volcano": "Volcano",
+      "snow": "Snow",
+      "space": "Space"
+    }
+  },
+  "weapons": {
+    "bullet": "Bullet",
+    "sword": "Sword",
+    "lightning": "Lightning",
+    "spear": "Spear",
+    "blade": "Blade",
+    "laser": "Laser",
+    "shotgun": "Shotgun",
+    "missile": "Missile",
+    "ice": "Ice Shard",
+    "shockwave": "Shockwave",
+    "boomerang": "Boomerang",
+    "poison": "Poison Pool"
+  },
+  "passives": {
+    "maxHp": "Max HP +20%",
+    "hpRegen": "HP Regen +1/s",
+    "speed": "Move Speed +20%",
+    "damage": "Damage +25%",
+    "cooldown": "Cooldown -20%",
+    "expGain": "EXP Gain +30%",
+    "pickupRange": "Pickup Range +50%",
+    "weaponSize": "Weapon Size +30%",
+    "damageReduction": "Damage Reduction +20%",
+    "weaponCount": "Weapon Count +1"
+  },
+  "items": {
+    "heal": "Heal 50%",
+    "magnet": "Magnet",
+    "powerUp": "Power Up",
+    "coin": "Coin",
+    "freeze": "Freeze",
+    "shield": "Shield"
+  },
+  "descriptions": {
+    "bullet": "Shoots forward projectiles",
+    "sword": "Slashes in front",
+    "lightning": "Strikes random enemies",
+    "spear": "Piercing projectile",
+    "blade": "Orbits around player",
+    "laser": "Penetrating beam",
+    "shotgun": "Spread shot",
+    "missile": "Homing projectiles",
+    "ice": "Slows enemies",
+    "shockwave": "Area damage",
+    "boomerang": "Returns to player",
+    "poison": "Creates poison pools"
+  }
+}
