@@ -35,24 +35,26 @@ function App() {
 
   // 소켓 이벤트 리스너 설정
   useEffect(() => {
-    if (!socket.socket) return;
+    // 소켓 연결 시작
+    const connectedSocket = socket.connect();
+    if (!connectedSocket) return;
 
     const cleanup: (() => void)[] = [];
 
-    // 연결 상태 관리
-    cleanup.push(socket.on('connect', () => {
-      console.log('서버에 연결되었습니다');
-      setGameState(prev => ({ ...prev, isConnected: true, error: null }));
-    }));
+    // 연결 상태는 useSocket에서 관리되므로 여기서는 제거
+    // cleanup.push(socket.on('connect', () => {
+    //   console.log('서버에 연결되었습니다');
+    //   setGameState(prev => ({ ...prev, isConnected: true, error: null }));
+    // }));
 
-    cleanup.push(socket.on('disconnect', () => {
-      console.log('서버와의 연결이 끊어졌습니다');
-      setGameState(prev => ({ 
-        ...prev, 
-        isConnected: false,
-        error: '서버와의 연결이 끊어졌습니다'
-      }));
-    }));
+    // cleanup.push(socket.on('disconnect', () => {
+    //   console.log('서버와의 연결이 끊어졌습니다');
+    //   setGameState(prev => ({ 
+    //     ...prev, 
+    //     isConnected: false,
+    //     error: '서버와의 연결이 끊어졌습니다'
+    //   }));
+    // }));
 
     // 룸 관련 이벤트
     cleanup.push(socket.on('roomCreated', (room: Room) => {
@@ -154,12 +156,14 @@ function App() {
 
     return () => {
       cleanup.forEach(fn => fn());
+      socket.disconnect();
     };
-  }, [socket]);
+  }, []); // socket 의존성 제거하여 한 번만 실행
 
   // 컨텍스트 값 생성
   const contextValue: AppContextType = {
     ...gameState,
+    isConnected: socket.isConnected, // useSocket에서 관리하는 상태 사용
     setCurrentScreen: (screen) => setGameState(prev => ({ ...prev, currentScreen: screen })),
     setSelectedGame: (game) => setGameState(prev => ({ ...prev, selectedGame: game })),
     setPlayerName: (name) => setGameState(prev => ({ ...prev, playerName: name })),
@@ -193,8 +197,8 @@ function App() {
     <GameContext.Provider value={contextValue}>
       <div className="app">
         {/* 연결 상태 표시 */}
-        <div className={`connection-status ${gameState.isConnected ? 'connected' : 'disconnected'}`}>
-          {gameState.isConnected ? '🟢 연결됨' : '🔴 연결 끊김'}
+        <div className={`connection-status ${socket.isConnected ? 'connected' : 'disconnected'}`}>
+          {socket.isConnected ? '🟢 연결됨' : '🔴 연결 끊김'}
         </div>
 
         {/* 에러 메시지 */}

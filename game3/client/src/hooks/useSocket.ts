@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useMemo, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import type { ServerToClientEvents, ClientToServerEvents } from '@shared/types';
 
@@ -12,19 +12,69 @@ const getSocketUrl = () => {
 
 const SOCKET_URL = getSocketUrl();
 
+// 디버깅용 로그
+console.log('🔗 Socket URL:', SOCKET_URL);
+console.log('🌍 Current hostname:', window.location.hostname);
+
 export const useSocket = () => {
   const socketRef = useRef<SocketType | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
 
-  const connect = useCallback(() => {
+  // 한 번만 생성되는 socket 인스턴스
+  useEffect(() => {
     if (!socketRef.current) {
+      console.log('🔌 Socket.IO 인스턴스 생성 중...', SOCKET_URL);
       socketRef.current = io(SOCKET_URL, {
         transports: ['websocket', 'polling'],
-        autoConnect: false
+        autoConnect: false,
+        timeout: 20000,
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000
+      });
+
+      // 연결 디버깅 이벤트
+      socketRef.current.on('connect', () => {
+        console.log('✅ Socket.IO 연결 성공');
+        setIsConnected(true);
+      });
+
+      socketRef.current.on('disconnect', (reason) => {
+        console.log('❌ Socket.IO 연결 끊김:', reason);
+        setIsConnected(false);
+      });
+
+      socketRef.current.on('connect_error', (error) => {
+        console.error('🚫 Socket.IO 연결 에러:', error);
+        setIsConnected(false);
+      });
+
+      socketRef.current.on('reconnect', (attemptNumber) => {
+        console.log('🔄 Socket.IO 재연결 성공 (시도 #' + attemptNumber + ')');
+        setIsConnected(true);
+      });
+
+      socketRef.current.on('reconnect_attempt', (attemptNumber) => {
+        console.log('🔄 Socket.IO 재연결 시도 #' + attemptNumber);
+      });
+
+      socketRef.current.on('reconnect_error', (error) => {
+        console.error('🚫 Socket.IO 재연결 에러:', error);
+      });
+
+      socketRef.current.on('reconnect_failed', () => {
+        console.error('💀 Socket.IO 재연결 실패 - 최대 시도 횟수 초과');
+        setIsConnected(false);
       });
     }
-    
-    if (!socketRef.current.connected) {
+  }, []);
+
+  const connect = useCallback(() => {
+    if (socketRef.current && !socketRef.current.connected) {
+      console.log('🚀 Socket.IO 연결 시도 중...');
       socketRef.current.connect();
+    } else if (socketRef.current?.connected) {
+      console.log('ℹ️ Socket.IO 이미 연결됨');
     }
     
     return socketRef.current;
@@ -75,13 +125,13 @@ export const useSocket = () => {
     };
   }, [disconnect]);
 
-  return {
+  return useMemo(() => ({
     socket: socketRef.current,
     connect,
     disconnect,
     emit,
     on,
     off,
-    isConnected: socketRef.current?.connected || false
-  };
+    isConnected
+  }), [connect, disconnect, emit, on, off, isConnected]);
 };
