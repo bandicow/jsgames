@@ -1,4 +1,5 @@
 import { FC, useState } from 'react'
+import MiniMusicPlayer from '../music/MiniMusicPlayer'
 
 const LeftPanel: FC = () => {
   const [activeTab, setActiveTab] = useState('today')
@@ -42,6 +43,14 @@ const LeftPanel: FC = () => {
             🔔 알림 설정
           </button>
         </div>
+      </div>
+
+      {/* 음악 플레이어 섹션 */}
+      <div className="mt-6 pt-6 border-t border-gray-200/20 dark:border-gray-700/20">
+        <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-3">
+          현재 재생 중
+        </h3>
+        <MiniMusicPlayer />
       </div>
     </aside>
   )

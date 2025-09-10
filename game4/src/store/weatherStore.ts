@@ -116,17 +116,17 @@ export const useWeatherStore = create<WeatherState>((set, get) => ({
       
       const forecast: ForecastData = {
         hourly: (data.hourly || []).slice(0, 12).map((hour: any) => ({
-          time: hour.dt * 1000,
-          temperature: Math.round(hour.temp),
-          condition: hour.weather?.[0]?.main || 'Clear',
-          precipitationProbability: hour.pop
+          time: new Date(hour.time).getTime(),
+          temperature: Math.round(hour.temperature),
+          condition: hour.condition || 'Clear',
+          precipitationProbability: hour.precipitationProbability
         })),
         daily: (data.daily || []).slice(0, 7).map((day: any) => ({
-          date: day.dt * 1000,
-          tempMin: Math.round(day.temp?.min || 0),
-          tempMax: Math.round(day.temp?.max || 0),
-          condition: day.weather?.[0]?.main || 'Clear',
-          precipitationProbability: day.pop
+          date: new Date(day.time).getTime(),
+          tempMin: Math.round(day.temperatureMin || 0),
+          tempMax: Math.round(day.temperatureMax || 0),
+          condition: day.condition || 'Clear',
+          precipitationProbability: day.precipitationProbability
         }))
       }
       

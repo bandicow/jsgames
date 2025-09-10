@@ -114,13 +114,13 @@ const transformOpenMeteoData = (data, location = '현재 위치') => {
         current.us_aqi
       )
     },
-    hourly: hourly.time ? hourly.time.slice(0, 24).map((time, index) => ({
+    hourly: (hourly?.time && Array.isArray(hourly.time)) ? hourly.time.slice(0, 24).map((time, index) => ({
       dt: new Date(time).getTime() / 1000,
       temp: hourly.temperature_2m?.[index] || 20,
       weather: [getWeatherDescription(hourly.weathercode?.[index] || 0)],
       pop: (hourly.precipitation_probability?.[index] || 0) / 100
     })) : [],
-    daily: daily.time ? daily.time.slice(0, 7).map((time, index) => ({
+    daily: (daily?.time && Array.isArray(daily.time)) ? daily.time.slice(0, 7).map((time, index) => ({
       dt: new Date(time).getTime() / 1000,
       temp: { 
         min: daily.temperature_2m_min?.[index] || 15, 
@@ -310,23 +310,69 @@ router.get('/forecast', async (req, res) => {
       }
     )
     
-    const transformedData = transformOpenMeteoData(response.data)
+    // 응답 데이터 안전성 확인
+    if (!response.data) {
+      throw new Error('No data received from weather API')
+    }
+    
+    // Forecast 전용 변환 함수 (current 데이터 없음)
+    const transformForecastData = (data) => {
+      const hourly = data.hourly || {}
+      const daily = data.daily || {}
+      
+      const getWeatherDescription = (code) => {
+        const weatherCodes = {
+          0: { main: 'Clear', description: '맑음', icon: '☀️' },
+          1: { main: 'Clear', description: '대체로 맑음', icon: '🌤️' },
+          2: { main: 'Clouds', description: '부분적으로 흐림', icon: '⛅' },
+          3: { main: 'Clouds', description: '흐림', icon: '☁️' },
+          61: { main: 'Rain', description: '비', icon: '🌧️' },
+          63: { main: 'Rain', description: '강한 비', icon: '🌧️' },
+          80: { main: 'Rain', description: '소나기', icon: '🌦️' }
+        }
+        return weatherCodes[code] || { main: 'Clear', description: '맑음', icon: '🌤️' }
+      }
+      
+      return {
+        hourly: (hourly?.time && Array.isArray(hourly.time)) ? hourly.time.slice(0, 24).map((time, index) => ({
+          time: time,
+          temperature: hourly.temperature_2m?.[index] || 20,
+          condition: getWeatherDescription(hourly.weathercode?.[index] || 0).main,
+          precipitationProbability: (hourly.precipitation_probability?.[index] || 0) / 100
+        })) : [],
+        daily: (daily?.time && Array.isArray(daily.time)) ? daily.time.slice(0, 7).map((time, index) => ({
+          time: time,
+          temperatureMax: daily.temperature_2m_max?.[index] || 25,
+          temperatureMin: daily.temperature_2m_min?.[index] || 15,
+          condition: getWeatherDescription(daily.weathercode?.[index] || 0).main,
+          precipitationProbability: (daily.precipitation_probability_max?.[index] || 0) / 100
+        })) : []
+      }
+    }
+    
+    const transformedData = transformForecastData(response.data)
     
     res.json({
       success: true,
       data: {
-        hourly: transformedData.hourly,
-        daily: transformedData.daily
+        hourly: transformedData.hourly || [],
+        daily: transformedData.daily || []
       },
       cached: false,
       source: 'open-meteo'
     })
   } catch (error) {
     console.error('Forecast API Error:', error.message)
+    
+    // 에러 시 기본 예보 데이터 반환
     res.status(500).json({
       success: false,
       error: 'Failed to fetch forecast data',
-      message: error.message
+      message: error.message,
+      data: {
+        hourly: [],
+        daily: []
+      }
     })
   }
 })

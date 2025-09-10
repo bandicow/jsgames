@@ -73,6 +73,53 @@ export enum CardType {
   WEATHER = 'weather',
 }
 
+// 음악 관련 타입
+export interface MusicTrack {
+  id: string
+  title: string
+  artist: string
+  album?: string
+  duration: number // 초 단위
+  url: string
+  thumbnail?: string
+  genre: string[]
+  mood: MoodToken
+  isAmbient: boolean // 환경음 여부
+}
+
+export interface MusicPlaylist {
+  id: string
+  name: string
+  mood: MoodToken
+  tracks: MusicTrack[]
+  isDefault: boolean // 기본 제공 플레이리스트
+  thumbnail?: string
+}
+
+export interface AudioState {
+  currentTrack: MusicTrack | null
+  currentPlaylist: MusicPlaylist | null
+  isPlaying: boolean
+  isPaused: boolean
+  volume: number // 0-1
+  currentTime: number
+  duration: number
+  isLoading: boolean
+  error: string | null
+  repeat: 'none' | 'track' | 'playlist'
+  shuffle: boolean
+  audioMode: 'music' | 'ambient' | 'both'
+}
+
+export interface WeatherMusicMapping {
+  mood: MoodToken
+  musicGenres: string[]
+  ambientSounds: string[]
+  energyLevel: 'low' | 'medium' | 'high'
+  musicDescription: string
+  ambientDescription: string
+}
+
 // 사용자 설정
 export interface UserPreferences {
   theme: 'light' | 'dark' | 'auto'
@@ -85,4 +132,11 @@ export interface UserPreferences {
   autoRefresh: boolean
   refreshInterval: number // 분 단위
   language: 'ko' | 'en'
+  music: {
+    enabled: boolean
+    autoPlay: boolean
+    volume: number
+    preferredMode: 'music' | 'ambient' | 'both'
+    spotifyConnected: boolean
+  }
 }

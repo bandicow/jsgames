@@ -1,10 +1,10 @@
 import { FC } from 'react'
 import BaseCard from '../cards/BaseCard'
+import MusicCard from '../music/MusicCard'
 
 const MainContent: FC = () => {
-  // 임시 카드 데이터
+  // 임시 카드 데이터 (음악 카드는 별도 컴포넌트로 분리)
   const cards = [
-    { id: 1, type: 'music', title: '🎵 무드 음악', content: '오늘의 날씨에 어울리는 음악 추천' },
     { id: 2, type: 'quiz', title: '🧠 퀴즈 타임', content: '두뇌를 깨우는 재미있는 퀴즈' },
     { id: 3, type: 'random', title: '🎲 랜덤 즐길거리', content: '우주 사진과 재미있는 사실' },
     { id: 4, type: 'activity', title: '💡 액티비티', content: '날씨에 맞는 활동 추천' },
@@ -26,6 +26,12 @@ const MainContent: FC = () => {
 
       {/* 카드 그리드 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* 음악 카드 - 첫 번째 위치 */}
+        <div className="md:col-span-2">
+          <MusicCard />
+        </div>
+        
+        {/* 나머지 카드들 */}
         {cards.map((card) => (
           <BaseCard key={card.id} {...card} />
         ))}
