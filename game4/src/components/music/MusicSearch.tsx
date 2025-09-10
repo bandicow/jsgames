@@ -2,6 +2,7 @@ import { FC, useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { useMusicStore } from '../../store/musicStore'
 import { MusicTrack } from '../../types'
+import { createApiUrl } from '../../utils/api'
 
 interface MusicSearchProps {
   className?: string
@@ -35,11 +36,11 @@ const MusicSearch: FC<MusicSearchProps> = ({ className = '' }) => {
     try {
       let endpoint = ''
       if (type === 'trending') {
-        endpoint = `http://localhost:3004/api/music/trending?limit=12`
+        endpoint = createApiUrl(`/music/trending?limit=12`)
       } else if (type === 'artist') {
-        endpoint = `http://localhost:3004/api/music/artist/${encodeURIComponent(searchQuery.trim())}`
+        endpoint = createApiUrl(`/music/artist/${encodeURIComponent(searchQuery.trim())}`)
       } else if (type === 'genre') {
-        endpoint = `http://localhost:3004/api/music/genre/${encodeURIComponent(searchQuery.trim())}`
+        endpoint = createApiUrl(`/music/genre/${encodeURIComponent(searchQuery.trim())}`)
       }
 
       const response = await fetch(endpoint)

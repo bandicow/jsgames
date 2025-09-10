@@ -21,7 +21,12 @@ const PORT = process.env.PORT || 3004
 // 미들웨어
 app.use(helmet())
 app.use(cors({
-  origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:3003', 'http://localhost:5173'],
+  origin: process.env.CORS_ORIGINS?.split(',') || [
+    'http://localhost:3003', 
+    'http://localhost:5173',
+    /^http:\/\/192\.168\.\d+\.\d+:3003$/, // 네트워크 IP 패턴 허용
+    /^http:\/\/\d+\.\d+\.\d+\.\d+:3003$/, // 모든 IP 패턴 허용
+  ],
   credentials: true
 }))
 app.use(express.json())
@@ -80,12 +85,13 @@ app.use((req, res) => {
   })
 })
 
-// 서버 시작
-app.listen(PORT, () => {
+// 서버 시작 - 모든 인터페이스에서 접근 가능하도록 설정
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`
   🚀 Server is running!
   📡 Port: ${PORT}
   🌍 Environment: ${process.env.NODE_ENV || 'development'}
-  🔗 Health check: http://localhost:${PORT}/api/health
+  🔗 Local: http://localhost:${PORT}/api/health
+  🌐 Network: http://0.0.0.0:${PORT}/api/health
   `)
 })

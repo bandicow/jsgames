@@ -105,13 +105,15 @@ const MOOD_TO_API_KEY = {
   [MoodToken.COLD_WARMUP]: 'cold_warmup'
 }
 
+import { createApiUrl } from '../utils/api'
+
 // API에서 음악 트랙을 가져오는 함수
 const fetchMusicFromAPI = async (mood: MoodToken): Promise<MusicTrack[]> => {
   try {
     const moodKey = MOOD_TO_API_KEY[mood]
     if (!moodKey) return []
 
-    const response = await fetch(`http://localhost:3004/api/music/search?mood=${moodKey}&limit=10`)
+    const response = await fetch(createApiUrl(`/music/search?mood=${moodKey}&limit=10`))
     const data = await response.json()
     
     if (!data.success || !data.data.tracks) {

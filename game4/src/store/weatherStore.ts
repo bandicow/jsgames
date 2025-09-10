@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import axios from 'axios'
 import { CurrentWeather, ForecastData, AQIData, MoodToken } from '../types'
+import { createApiUrl } from '../utils/api'
 
 interface WeatherState {
   // 상태
@@ -52,7 +53,7 @@ export const useWeatherStore = create<WeatherState>((set, get) => ({
     set({ loading: true, error: null })
     
     try {
-      const response = await axios.get('/api/weather/current', {
+      const response = await axios.get(createApiUrl('/weather/current'), {
         params: { lat, lon }
       })
       
@@ -108,7 +109,7 @@ export const useWeatherStore = create<WeatherState>((set, get) => ({
   // 예보 가져오기
   fetchForecast: async (lat: number, lon: number) => {
     try {
-      const response = await axios.get('/api/weather/forecast', {
+      const response = await axios.get(createApiUrl('/weather/forecast'), {
         params: { lat, lon }
       })
       
@@ -164,7 +165,7 @@ export const useWeatherStore = create<WeatherState>((set, get) => ({
     } catch (error) {
       // IP 기반 위치 폴백
       try {
-        const response = await axios.get('/api/weather/location')
+        const response = await axios.get(createApiUrl('/weather/location'))
         const { lat, lon, city } = response.data.data
         
         set({
