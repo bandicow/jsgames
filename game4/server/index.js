@@ -7,6 +7,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import weatherRoutes from './routes/weather.js'
 import musicRoutes from './routes/music.js'
+import quizAIRoutes from './routes/quizAI.js'
 
 // ES 모듈에서 __dirname 사용
 const __filename = fileURLToPath(import.meta.url)
@@ -14,6 +15,7 @@ const __dirname = path.dirname(__filename)
 
 // 환경변수 로드
 dotenv.config({ path: path.join(__dirname, '..', '.env.development') })
+console.log('GEMINI_API_KEY loaded:', process.env.GEMINI_API_KEY ? 'Yes' : 'No')
 
 const app = express()
 const PORT = process.env.PORT || 3004
@@ -22,10 +24,13 @@ const PORT = process.env.PORT || 3004
 app.use(helmet())
 app.use(cors({
   origin: process.env.CORS_ORIGINS?.split(',') || [
-    'http://localhost:3003', 
+    'http://localhost:3003',
+    'http://localhost:3004',
     'http://localhost:5173',
     /^http:\/\/192\.168\.\d+\.\d+:3003$/, // 네트워크 IP 패턴 허용
+    /^http:\/\/192\.168\.\d+\.\d+:3004$/, // 네트워크 IP 패턴 허용
     /^http:\/\/\d+\.\d+\.\d+\.\d+:3003$/, // 모든 IP 패턴 허용
+    /^http:\/\/\d+\.\d+\.\d+\.\d+:3004$/, // 모든 IP 패턴 허용
   ],
   credentials: true
 }))
@@ -44,6 +49,7 @@ app.use('/api', limiter)
 // API 라우트
 app.use('/api/weather', weatherRoutes)
 app.use('/api/music', musicRoutes)
+app.use('/api/quiz-ai', quizAIRoutes)
 
 // 헬스체크
 app.get('/api/health', (req, res) => {

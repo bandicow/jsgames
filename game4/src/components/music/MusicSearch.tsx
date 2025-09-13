@@ -23,7 +23,7 @@ const MusicSearch: FC<MusicSearchProps> = ({ className = '' }) => {
   const [searchResults, setSearchResults] = useState<MusicTrack[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [searchType, setSearchType] = useState<'artist' | 'genre' | 'trending'>('artist')
-  const searchTimeoutRef = useRef<NodeJS.Timeout>()
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
 
   const performSearch = async (searchQuery: string, type: 'artist' | 'genre' | 'trending') => {
     if (!searchQuery.trim() && type !== 'trending') {

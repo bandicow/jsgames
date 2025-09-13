@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react'
+import { FC, useState } from 'react'
 import { useWeatherStore } from '../../store/weatherStore'
 import WeatherRadar from '../weather/WeatherRadar'
 import AirQualityDetail from '../weather/AirQualityDetail'
