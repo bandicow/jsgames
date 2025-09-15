@@ -333,13 +333,29 @@ router.get('/forecast', async (req, res) => {
         return weatherCodes[code] || { main: 'Clear', description: '맑음', icon: '🌤️' }
       }
       
+      // 현재 시간 가져오기
+      const now = new Date()
+      const currentHour = now.getTime()
+
+      // 시간별 예보 필터링 - 현재 시간 이후의 데이터만 포함
+      const hourlyData = []
+      if (hourly?.time && Array.isArray(hourly.time)) {
+        hourly.time.forEach((time, index) => {
+          const hourTime = new Date(time).getTime()
+          // 현재 시간 이후의 데이터만 추가
+          if (hourTime >= currentHour) {
+            hourlyData.push({
+              time: time,
+              temperature: hourly.temperature_2m?.[index] || 20,
+              condition: getWeatherDescription(hourly.weathercode?.[index] || 0).main,
+              precipitationProbability: (hourly.precipitation_probability?.[index] || 0) / 100
+            })
+          }
+        })
+      }
+
       return {
-        hourly: (hourly?.time && Array.isArray(hourly.time)) ? hourly.time.slice(0, 24).map((time, index) => ({
-          time: time,
-          temperature: hourly.temperature_2m?.[index] || 20,
-          condition: getWeatherDescription(hourly.weathercode?.[index] || 0).main,
-          precipitationProbability: (hourly.precipitation_probability?.[index] || 0) / 100
-        })) : [],
+        hourly: hourlyData.slice(0, 24), // 최대 24시간
         daily: (daily?.time && Array.isArray(daily.time)) ? daily.time.slice(0, 7).map((time, index) => ({
           time: time,
           temperatureMax: daily.temperature_2m_max?.[index] || 25,

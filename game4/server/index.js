@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url'
 import weatherRoutes from './routes/weather.js'
 import musicRoutes from './routes/music.js'
 import quizAIRoutes from './routes/quizAI.js'
+import worldExplorerRoutes from './routes/worldExplorer.js'
 
 // ES 모듈에서 __dirname 사용
 const __filename = fileURLToPath(import.meta.url)
@@ -50,6 +51,7 @@ app.use('/api', limiter)
 app.use('/api/weather', weatherRoutes)
 app.use('/api/music', musicRoutes)
 app.use('/api/quiz-ai', quizAIRoutes)
+app.use('/api/world-explorer', worldExplorerRoutes)
 
 // 헬스체크
 app.get('/api/health', (req, res) => {

@@ -2,14 +2,14 @@ import { FC } from 'react'
 import BaseCard from '../cards/BaseCard'
 import MusicCard from '../music/MusicCard'
 import AIQuizCard from '../quiz/AIQuizCard'
+import WorldExplorer from '../world/WorldExplorer'
 import { useWeatherStore } from '../../store/weatherStore'
 
 const MainContent: FC = () => {
   const { weather, currentMood } = useWeatherStore()
-  
+
   // 나머지 카드 데이터 (퀴즈는 별도 컴포넌트로 분리)
   const cards = [
-    { id: 3, type: 'random', title: '🎲 랜덤 즐길거리', content: '우주 사진과 재미있는 사실' },
     { id: 4, type: 'activity', title: '💡 액티비티', content: '날씨에 맞는 활동 추천' },
     { id: 5, type: 'news', title: '📰 간단 정보', content: '오늘의 유용한 정보' },
     { id: 6, type: 'game', title: '🎮 미니게임', content: '간단한 브라우저 게임' },
@@ -107,6 +107,11 @@ const MainContent: FC = () => {
         {/* AI 퀴즈 카드 - Gemini 기반 */}
         <div className="md:col-span-2">
           <AIQuizCard />
+        </div>
+
+        {/* 세상 둘러보기 카드 */}
+        <div className="md:col-span-2">
+          <WorldExplorer />
         </div>
 
         {/* 나머지 카드들 */}
