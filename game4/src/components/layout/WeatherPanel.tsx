@@ -192,46 +192,64 @@ const WeatherPanel: FC = () => {
       <div className="glass-card p-4">
         <h3 className="font-semibold mb-3">상세 정보</h3>
         <div className="space-y-2">
-          <button
-            onClick={() => setShowRadar(!showRadar)}
-            className="w-full glass-button text-left flex items-center justify-between hover:bg-white/20 dark:hover:bg-white/10"
-          >
-            <span className="flex items-center gap-2">
-              <span>🛰️</span>
-              <span>기상 레이더</span>
-            </span>
-            <span className="text-sm">
-              {showRadar ? '▼' : '▶'}
-            </span>
-          </button>
-          
-          <button
-            onClick={() => setShowAirQuality(!showAirQuality)}
-            className="w-full glass-button text-left flex items-center justify-between hover:bg-white/20 dark:hover:bg-white/10"
-          >
-            <span className="flex items-center gap-2">
-              <span>🌬️</span>
-              <span>미세먼지 상세</span>
-            </span>
-            <span className="text-sm">
-              {showAirQuality ? '▼' : '▶'}
-            </span>
-          </button>
+          {/* 기상 레이더 토글 */}
+          <div>
+            <button
+              onClick={() => {
+                setShowRadar(!showRadar)
+                if (!showRadar) {
+                  setShowAirQuality(false)
+                }
+              }}
+              className="w-full glass-button text-left flex items-center justify-between hover:bg-white/20 dark:hover:bg-white/10"
+            >
+              <span className="flex items-center gap-2">
+                <span>🛰️</span>
+                <span>기상 레이더</span>
+              </span>
+              <span className="text-sm">
+                {showRadar ? '▼' : '▶'}
+              </span>
+            </button>
+            {/* 기상 레이더 컨텐츠 */}
+            {showRadar && location && (
+              <div className="mt-2">
+                <WeatherRadar lat={location.lat} lon={location.lon} />
+              </div>
+            )}
+          </div>
+
+          {/* 미세먼지 상세 토글 */}
+          <div>
+            <button
+              onClick={() => {
+                setShowAirQuality(!showAirQuality)
+                if (!showAirQuality) {
+                  setShowRadar(false)
+                }
+              }}
+              className="w-full glass-button text-left flex items-center justify-between hover:bg-white/20 dark:hover:bg-white/10"
+            >
+              <span className="flex items-center gap-2">
+                <span>🌬️</span>
+                <span>미세먼지 상세</span>
+              </span>
+              <span className="text-sm">
+                {showAirQuality ? '▼' : '▶'}
+              </span>
+            </button>
+            {/* 미세먼지 상세 컨텐츠 */}
+            {showAirQuality && (
+              <div className="mt-2">
+                <AirQualityDetail
+                  airQuality={airQuality}
+                  location={location?.name || weather.location}
+                />
+              </div>
+            )}
+          </div>
         </div>
       </div>
-
-      {/* 기상 레이더 */}
-      {showRadar && location && (
-        <WeatherRadar lat={location.lat} lon={location.lon} />
-      )}
-
-      {/* 미세먼지 상세 */}
-      {showAirQuality && (
-        <AirQualityDetail 
-          airQuality={airQuality} 
-          location={location?.name || weather.location}
-        />
-      )}
 
       {/* 생활 팁 */}
       <div className="glass-card p-4">

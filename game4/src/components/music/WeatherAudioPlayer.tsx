@@ -96,12 +96,17 @@ const WeatherAudioPlayer: FC<WeatherAudioPlayerProps> = ({ className = '' }) => 
   // 재생/일시정지 제어
   useEffect(() => {
     const audio = audioRef.current
-    if (!audio) return
+    if (!audio || !currentTrack) return
 
     if (isPlaying && !isPaused) {
+      // 새 트랙이면 src 설정
+      if (audio.src !== currentTrack.url) {
+        audio.src = currentTrack.url
+      }
+
       audio.play().catch((error) => {
         console.error('Audio playback failed:', error)
-        useMusicStore.setState({ 
+        useMusicStore.setState({
           error: '음악을 재생할 수 없습니다. 브라우저 정책상 사용자 상호작용이 필요할 수 있습니다.',
           isPlaying: false,
           isLoading: false
@@ -110,7 +115,7 @@ const WeatherAudioPlayer: FC<WeatherAudioPlayerProps> = ({ className = '' }) => 
     } else {
       audio.pause()
     }
-  }, [isPlaying, isPaused])
+  }, [isPlaying, isPaused, currentTrack])
 
   // 볼륨 제어
   useEffect(() => {

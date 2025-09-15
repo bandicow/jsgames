@@ -162,25 +162,23 @@ export const useMusicStore = create<MusicState>((set, get) => ({
   isInitialized: false,
   
   // 음악 시스템 초기화 (자동 재생 포함)
-  initializeMusic: (mood?: MoodToken) => {
+  initializeMusic: async (mood?: MoodToken) => {
     const { isInitialized } = get()
     if (isInitialized) return
-    
+
     // 기본 무드 설정 (맑은 날씨)
     const defaultMood = mood || MoodToken.SUNNY_UPBEAT
-    
-    // 날씨 음악 로드
-    get().loadWeatherMusic(defaultMood)
-    
-    // 첫 번째 트랙 자동 재생 (2초 후 - 사용자 상호작용 필요성 고려)
-    setTimeout(() => {
-      const { recommendations } = get()
-      if (recommendations.length > 0) {
-        const firstTrack = recommendations[0]
-        get().playTrack(firstTrack)
-      }
-    }, 2000)
-    
+
+    // 날씨 음악 로드하고 완료 대기
+    await get().loadWeatherMusic(defaultMood)
+
+    // 로드 완료 후 첫 번째 트랙 자동 재생
+    const { recommendations } = get()
+    if (recommendations.length > 0) {
+      const firstTrack = recommendations[0]
+      get().playTrack(firstTrack)
+    }
+
     set({ isInitialized: true })
   },
   
@@ -270,7 +268,7 @@ export const useMusicStore = create<MusicState>((set, get) => ({
   // 다음 트랙
   nextTrack: () => {
     const { currentPlaylist, currentTrack, shuffle, recommendations } = get()
-    
+
     let tracks: MusicTrack[] = []
     if (currentPlaylist) {
       tracks = currentPlaylist.tracks
@@ -279,9 +277,9 @@ export const useMusicStore = create<MusicState>((set, get) => ({
     } else {
       return
     }
-    
+
     if (tracks.length === 0) return
-    
+
     let nextIndex = 0
     if (currentTrack) {
       const currentIndex = tracks.findIndex(t => t.id === currentTrack.id)
@@ -293,15 +291,24 @@ export const useMusicStore = create<MusicState>((set, get) => ({
         }
       }
     }
-    
+
     const nextTrack = tracks[nextIndex]
-    get().playTrack(nextTrack, currentPlaylist || undefined)
+    // 다음 트랙 재생 시 자동으로 재생 상태로 설정
+    set({
+      currentTrack: nextTrack,
+      currentPlaylist: currentPlaylist || null,
+      isPlaying: true,
+      isPaused: false,
+      isLoading: true,
+      error: null,
+      currentTime: 0 // 새 트랙이므로 시간 초기화
+    })
   },
   
   // 이전 트랙
   previousTrack: () => {
     const { currentPlaylist, currentTrack, shuffle, recommendations } = get()
-    
+
     let tracks: MusicTrack[] = []
     if (currentPlaylist) {
       tracks = currentPlaylist.tracks
@@ -310,9 +317,9 @@ export const useMusicStore = create<MusicState>((set, get) => ({
     } else {
       return
     }
-    
+
     if (tracks.length === 0) return
-    
+
     let prevIndex = 0
     if (currentTrack) {
       const currentIndex = tracks.findIndex(t => t.id === currentTrack.id)
@@ -324,9 +331,18 @@ export const useMusicStore = create<MusicState>((set, get) => ({
         }
       }
     }
-    
+
     const prevTrack = tracks[prevIndex]
-    get().playTrack(prevTrack, currentPlaylist || undefined)
+    // 이전 트랙 재생 시 자동으로 재생 상태로 설정
+    set({
+      currentTrack: prevTrack,
+      currentPlaylist: currentPlaylist || null,
+      isPlaying: true,
+      isPaused: false,
+      isLoading: true,
+      error: null,
+      currentTime: 0 // 새 트랙이므로 시간 초기화
+    })
   },
   
   // 볼륨 설정

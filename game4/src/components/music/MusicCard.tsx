@@ -20,13 +20,16 @@ const MusicCard: FC<MusicCardProps> = ({ className = '' }) => {
 
   // 음악 시스템 초기화 및 날씨 변화에 따른 음악 업데이트
   useEffect(() => {
-    if (!isInitialized) {
-      // 첫 초기화 - 현재 무드가 있으면 사용, 없으면 기본값
-      initializeMusic(currentMood || MoodToken.SUNNY_UPBEAT)
-    } else if (currentMood) {
-      // 이미 초기화되었지만 날씨가 변한 경우 음악 업데이트
-      loadWeatherMusic(currentMood)
+    const initMusic = async () => {
+      if (!isInitialized) {
+        // 첫 초기화 - 현재 무드가 있으면 사용, 없으면 기본값
+        await initializeMusic(currentMood || MoodToken.SUNNY_UPBEAT)
+      } else if (currentMood) {
+        // 이미 초기화되었지만 날씨가 변한 경우 음악 업데이트
+        await loadWeatherMusic(currentMood)
+      }
     }
+    initMusic()
   }, [currentMood, isInitialized, initializeMusic, loadWeatherMusic])
 
   const getMoodTitle = (mood: MoodToken | null): string => {
@@ -147,96 +150,108 @@ const MusicCard: FC<MusicCardProps> = ({ className = '' }) => {
 
       {/* 액션 버튼 */}
       <div className="space-y-2">
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            setShowRecommendations(!showRecommendations)
-            if (showRecommendations) {
-              setShowSearch(false)
-            }
-          }}
-          className="w-full glass-button p-3 rounded-lg hover:bg-white/20 dark:hover:bg-white/10 text-left flex items-center justify-between"
-        >
-          <span className="flex items-center gap-2">
-            <span>🎶</span>
-            <span>날씨 음악 추천</span>
-          </span>
-          <span className="text-sm">
-            {showRecommendations ? '▼' : '▶'}
-          </span>
-        </button>
+        {/* 날씨 음악 추천 토글 */}
+        <div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setShowRecommendations(!showRecommendations)
+              if (!showRecommendations) {
+                setShowSearch(false)
+                setShowFullPlayer(false)
+              }
+            }}
+            className="w-full glass-button p-3 rounded-lg hover:bg-white/20 dark:hover:bg-white/10 text-left flex items-center justify-between"
+          >
+            <span className="flex items-center gap-2">
+              <span>🎶</span>
+              <span>날씨 음악 추천</span>
+            </span>
+            <span className="text-sm">
+              {showRecommendations ? '▼' : '▶'}
+            </span>
+          </button>
+          {/* 확장된 음악 추천 */}
+          {showRecommendations && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mt-2 overflow-hidden"
+            >
+              <WeatherMusicRecommendations />
+            </motion.div>
+          )}
+        </div>
 
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            setShowSearch(!showSearch)
-            if (showSearch) {
-              setShowRecommendations(false)
-            }
-          }}
-          className="w-full glass-button p-3 rounded-lg hover:bg-white/20 dark:hover:bg-white/10 text-left flex items-center justify-between"
-        >
-          <span className="flex items-center gap-2">
-            <span>🔍</span>
-            <span>음악 검색</span>
-          </span>
-          <span className="text-sm">
-            {showSearch ? '▼' : '▶'}
-          </span>
-        </button>
+        {/* 음악 검색 토글 */}
+        <div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setShowSearch(!showSearch)
+              if (!showSearch) {
+                setShowRecommendations(false)
+                setShowFullPlayer(false)
+              }
+            }}
+            className="w-full glass-button p-3 rounded-lg hover:bg-white/20 dark:hover:bg-white/10 text-left flex items-center justify-between"
+          >
+            <span className="flex items-center gap-2">
+              <span>🔍</span>
+              <span>음악 검색</span>
+            </span>
+            <span className="text-sm">
+              {showSearch ? '▼' : '▶'}
+            </span>
+          </button>
+          {/* 확장된 음악 검색 */}
+          {showSearch && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mt-2 overflow-hidden"
+            >
+              <MusicSearch />
+            </motion.div>
+          )}
+        </div>
 
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            setShowFullPlayer(!showFullPlayer)
-          }}
-          className="w-full glass-button p-3 rounded-lg hover:bg-white/20 dark:hover:bg-white/10 text-left flex items-center justify-between"
-        >
-          <span className="flex items-center gap-2">
-            <span>🎛️</span>
-            <span>전체 플레이어</span>
-          </span>
-          <span className="text-sm">
-            {showFullPlayer ? '▼' : '▶'}
-          </span>
-        </button>
+        {/* 전체 플레이어 토글 */}
+        <div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setShowFullPlayer(!showFullPlayer)
+              if (!showFullPlayer) {
+                setShowRecommendations(false)
+                setShowSearch(false)
+              }
+            }}
+            className="w-full glass-button p-3 rounded-lg hover:bg-white/20 dark:hover:bg-white/10 text-left flex items-center justify-between"
+          >
+            <span className="flex items-center gap-2">
+              <span>🎛️</span>
+              <span>전체 플레이어</span>
+            </span>
+            <span className="text-sm">
+              {showFullPlayer ? '▼' : '▶'}
+            </span>
+          </button>
+          {/* 확장된 음악 플레이어 */}
+          {showFullPlayer && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mt-2 overflow-hidden"
+            >
+              <WeatherAudioPlayer />
+            </motion.div>
+          )}
+        </div>
       </div>
-
-      {/* 확장된 음악 추천 */}
-      {showRecommendations && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          exit={{ opacity: 0, height: 0 }}
-          className="mt-4 overflow-hidden"
-        >
-          <WeatherMusicRecommendations />
-        </motion.div>
-      )}
-
-      {/* 확장된 음악 검색 */}
-      {showSearch && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          exit={{ opacity: 0, height: 0 }}
-          className="mt-4 overflow-hidden"
-        >
-          <MusicSearch />
-        </motion.div>
-      )}
-
-      {/* 확장된 음악 플레이어 */}
-      {showFullPlayer && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          exit={{ opacity: 0, height: 0 }}
-          className="mt-4 overflow-hidden"
-        >
-          <WeatherAudioPlayer />
-        </motion.div>
-      )}
     </motion.div>
   )
 }
