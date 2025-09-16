@@ -10,6 +10,7 @@ import musicRoutes from './routes/music.js'
 import quizAIRoutes from './routes/quizAI.js'
 import worldExplorerRoutes from './routes/worldExplorer.js'
 import activityRoutes from './routes/activity.js'
+import newsRoutes from './routes/news.js'
 
 // ES 모듈에서 __dirname 사용
 const __filename = fileURLToPath(import.meta.url)
@@ -54,6 +55,7 @@ app.use('/api/music', musicRoutes)
 app.use('/api/quiz-ai', quizAIRoutes)
 app.use('/api/world-explorer', worldExplorerRoutes)
 app.use('/api/activity', activityRoutes)
+app.use('/api/news', newsRoutes)
 
 // 헬스체크
 app.get('/api/health', (req, res) => {

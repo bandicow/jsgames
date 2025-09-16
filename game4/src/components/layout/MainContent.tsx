@@ -4,14 +4,14 @@ import MusicCard from '../music/MusicCard'
 import AIQuizCard from '../quiz/AIQuizCard'
 import WorldExplorer from '../world/WorldExplorer'
 import ActivityCard from '../activity/ActivityCard'
+import NewsCard from '../news/NewsCard'
 import { useWeatherStore } from '../../store/weatherStore'
 
 const MainContent: FC = () => {
   const { weather, currentMood } = useWeatherStore()
 
-  // 나머지 카드 데이터 (퀴즈와 액티비티는 별도 컴포넌트로 분리)
+  // 나머지 카드 데이터 (뉴스, 퀴즈, 액티비티는 별도 컴포넌트로 분리)
   const cards = [
-    { id: 5, type: 'news', title: '📰 간단 정보', content: '오늘의 유용한 정보' },
     { id: 6, type: 'game', title: '🎮 미니게임', content: '간단한 브라우저 게임' },
   ]
 
@@ -117,6 +117,11 @@ const MainContent: FC = () => {
         {/* 액티비티 카드 */}
         <div className="md:col-span-2">
           <ActivityCard />
+        </div>
+
+        {/* AI 뉴스 요약 카드 */}
+        <div className="md:col-span-2">
+          <NewsCard />
         </div>
 
         {/* 나머지 카드들 */}
