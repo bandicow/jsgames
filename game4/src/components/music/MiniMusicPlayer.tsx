@@ -1,6 +1,7 @@
-import { FC, useState, useEffect, useRef } from 'react'
+import { FC } from 'react'
 import { motion } from 'framer-motion'
 import { useMusicStore } from '../../store/musicStore'
+import { useWeatherStore } from '../../store/weatherStore'
 
 interface MiniMusicPlayerProps {
   className?: string
@@ -8,61 +9,39 @@ interface MiniMusicPlayerProps {
 
 const MiniMusicPlayer: FC<MiniMusicPlayerProps> = ({ className = '' }) => {
   const {
-    currentTrack,
     isPlaying,
     volume,
-    currentTime,
-    duration,
-    playTrack,
+    setVolume,
     pauseTrack,
     resumeTrack,
-    nextTrack,
-    previousTrack,
-    setVolume,
-    setCurrentTime
+    youtubeTrackTitle,
+    youtubeTrackArtist
   } = useMusicStore()
 
-  const [localCurrentTime, setLocalCurrentTime] = useState(0)
-  const [localDuration, setLocalDuration] = useState(30) // 기본 30초
-  const [isDragging, setIsDragging] = useState(false)
-  const progressBarRef = useRef<HTMLDivElement>(null)
+  const { currentMood } = useWeatherStore()
 
-  // 재생 시간 업데이트
-  useEffect(() => {
-    if (!isPlaying || isDragging || !currentTrack) return
-
-    const interval = setInterval(() => {
-      setLocalCurrentTime(prev => {
-        if (prev >= localDuration) {
-          // 트랙 끝에 도달하면 다음 트랙으로
-          nextTrack()
-          return 0
-        }
-        return prev + 0.1
-      })
-    }, 100)
-
-    return () => clearInterval(interval)
-  }, [isPlaying, isDragging, localDuration, nextTrack, currentTrack])
-
-  // 트랙 변경 시 시간 초기화
-  useEffect(() => {
-    setLocalCurrentTime(0)
-    // 실제 duration이 있으면 사용, 없으면 30초 기본값
-    setLocalDuration(duration || 30)
-  }, [currentTrack, duration])
-
-  // 재생 상태가 바뀐때 시간 동기화
-  useEffect(() => {
-    if (!isPlaying) {
-      // 재생이 멈췄을 때는 현재 위치 유지
-      // 재생바는 안 움직임
+  // YouTube 플레이어에서 현재 재생 중인 트랙 정보 가져오기
+  const getCurrentTrackInfo = () => {
+    // Store에서 YouTube 트랙 정보 가져오기
+    if (youtubeTrackTitle && youtubeTrackArtist) {
+      return {
+        title: youtubeTrackTitle,
+        artist: youtubeTrackArtist
+      }
     }
-  }, [isPlaying])
+    // 기본값: 현재 무드 표시
+    if (isPlaying && currentMood) {
+      return {
+        title: '한국 음악 재생 중',
+        artist: getMoodDescription(currentMood)
+      }
+    }
+    return null
+  }
 
   const getMoodEmoji = () => {
-    if (!currentTrack) return '🎵'
-    
+    if (!currentMood) return '🎵'
+
     const moodEmojis = {
       sunny_upbeat: '☀️',
       cloudy_chill: '☁️',
@@ -73,13 +52,25 @@ const MiniMusicPlayer: FC<MiniMusicPlayerProps> = ({ className = '' }) => {
       heat_tropical: '🌴',
       cold_warmup: '🔥'
     }
-    
-    return moodEmojis[currentTrack.mood as keyof typeof moodEmojis] || '🎵'
+
+    return moodEmojis[currentMood as keyof typeof moodEmojis] || '🎵'
+  }
+
+  const getMoodDescription = (mood: string) => {
+    const moodDescriptions = {
+      sunny_upbeat: '맑은 날의 경쾌한 음악',
+      cloudy_chill: '구름 낀 날의 차분한 음악',
+      rain_lofi: '비오는 날의 감성적인 음악',
+      storm_energetic: '폭풍우의 역동적인 음악',
+      snow_cozy: '눈 내리는 날의 포근한 음악',
+      mist_ambient: '안개 낀 날의 신비로운 음악',
+      heat_tropical: '더운 날의 트로피컬 음악',
+      cold_warmup: '추운 날을 녹이는 따뜻한 음악'
+    }
+    return moodDescriptions[mood as keyof typeof moodDescriptions] || '음악'
   }
 
   const togglePlayPause = () => {
-    if (!currentTrack) return
-    
     if (isPlaying) {
       pauseTrack()
     } else {
@@ -87,13 +78,18 @@ const MiniMusicPlayer: FC<MiniMusicPlayerProps> = ({ className = '' }) => {
     }
   }
 
-  if (!currentTrack) {
+  const currentTrackInfo = getCurrentTrackInfo()
+
+  if (!currentTrackInfo && !isPlaying) {
     return (
       <div className={`glass-card p-3 ${className}`}>
         <div className="text-center">
           <div className="text-2xl mb-2">🎵</div>
           <p className="text-xs text-gray-600 dark:text-gray-400">
             재생 중인 음악이 없습니다
+          </p>
+          <p className="text-xs text-gray-500 mt-1">
+            음악 탭에서 재생하세요
           </p>
         </div>
       </div>
@@ -110,70 +106,38 @@ const MiniMusicPlayer: FC<MiniMusicPlayerProps> = ({ className = '' }) => {
       <div className="flex items-center space-x-2 mb-3">
         <div className="text-lg">{getMoodEmoji()}</div>
         <div className="flex-1 min-w-0">
-          <h4 className="font-medium truncate text-sm">{currentTrack.title}</h4>
+          <h4 className="font-medium truncate text-sm">
+            {currentTrackInfo ? currentTrackInfo.title : '음악 재생 중'}
+          </h4>
           <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
-            {currentTrack.artist}
+            {currentTrackInfo ? currentTrackInfo.artist : getMoodDescription(currentMood || 'sunny_upbeat')}
           </p>
         </div>
       </div>
 
-      {/* 재생 진행바 */}
-      <div className="mb-3">
-        <div
-          ref={progressBarRef}
-          className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 overflow-hidden cursor-pointer relative"
-          onClick={(e) => {
-            if (!progressBarRef.current) return
-            const rect = progressBarRef.current.getBoundingClientRect()
-            const x = e.clientX - rect.left
-            const percentage = x / rect.width
-            const newTime = percentage * localDuration
-            setLocalCurrentTime(newTime)
-            setCurrentTime(newTime)
-          }}
-          onMouseDown={() => setIsDragging(true)}
-          onMouseUp={() => setIsDragging(false)}
-          onMouseLeave={() => setIsDragging(false)}
-        >
-          <div
-            className="bg-blue-500 h-full rounded-full transition-all duration-100"
-            style={{ width: `${(localCurrentTime / localDuration) * 100}%` }}
-          />
-          <div
-            className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-md transition-all duration-100"
-            style={{ left: `calc(${(localCurrentTime / localDuration) * 100}% - 6px)` }}
-          />
-        </div>
-        <div className="flex justify-between mt-1 text-xs text-gray-500">
-          <span>{formatTime(localCurrentTime)}</span>
-          <span>{formatTime(localDuration)}</span>
+      {/* YouTube 플레이어 상태 표시 */}
+      <div className="mb-3 px-2">
+        <div className="flex items-center justify-between text-xs text-gray-500">
+          <span>YouTube 음악 플레이어</span>
+          <span className={`px-2 py-0.5 rounded-full ${
+            isPlaying
+              ? 'bg-green-500/20 text-green-600 dark:text-green-400'
+              : 'bg-gray-500/20 text-gray-600 dark:text-gray-400'
+          }`}>
+            {isPlaying ? '재생 중' : '일시 정지'}
+          </span>
         </div>
       </div>
 
-      {/* 기본 컨트롤 */}
-      <div className="flex items-center justify-center space-x-2 mb-2">
-        <button
-          onClick={previousTrack}
-          className="glass-button p-1.5 rounded-md hover:bg-white/20 dark:hover:bg-white/10 text-sm"
-          title="이전 곡"
-        >
-          ⏮️
-        </button>
-
+      {/* 빠른 컨트롤 */}
+      <div className="flex items-center justify-center mb-3">
         <button
           onClick={togglePlayPause}
-          className="glass-button p-2 rounded-full hover:bg-white/20 dark:hover:bg-white/10"
+          className="glass-button px-4 py-2 rounded-full hover:bg-white/20 dark:hover:bg-white/10 flex items-center space-x-2"
           title={isPlaying ? "일시정지" : "재생"}
         >
-          {isPlaying ? '⏸️' : '▶️'}
-        </button>
-
-        <button
-          onClick={nextTrack}
-          className="glass-button p-1.5 rounded-md hover:bg-white/20 dark:hover:bg-white/10 text-sm"
-          title="다음 곡"
-        >
-          ⏭️
+          <span>{isPlaying ? '⏸️' : '▶️'}</span>
+          <span className="text-sm">{isPlaying ? '일시정지' : '재생'}</span>
         </button>
       </div>
 
@@ -194,14 +158,38 @@ const MiniMusicPlayer: FC<MiniMusicPlayerProps> = ({ className = '' }) => {
         <span className="text-xs text-gray-500 min-w-[2ch]">{Math.round(volume * 100)}%</span>
       </div>
 
-      {/* 트랙 타입 표시 */}
-      {currentTrack.isAmbient && (
-        <div className="mt-2 text-center">
-          <span className="px-2 py-0.5 bg-green-500/20 text-green-600 dark:text-green-400 rounded-full text-xs">
-            환경음
-          </span>
-        </div>
-      )}
+      {/* 빠른 음악 설정 */}
+      <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+        <h5 className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">빠른 설정</h5>
+
+        {/* 음악 섹션으로 이동 버튼 */}
+        <button
+          onClick={() => {
+            // MusicCard가 있는 섹션으로 스크롤
+            const musicSection = document.querySelector('.music-card-section')
+            if (musicSection) {
+              musicSection.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            }
+          }}
+          className="w-full glass-button p-2 rounded-lg hover:bg-white/20 dark:hover:bg-white/10 text-xs mb-2"
+        >
+          <div className="flex items-center justify-between">
+            <span>🎵 음악 플레이어 열기</span>
+            <span>→</span>
+          </div>
+        </button>
+
+        {/* 날씨별 음악 추천 */}
+        {currentMood && (
+          <div className="text-xs text-gray-500 text-center">
+            <p className="mb-1">현재 날씨 음악</p>
+            <div className="flex items-center justify-center space-x-1">
+              <span>{getMoodEmoji()}</span>
+              <span className="text-xs">{currentMood.replace('_', ' ')}</span>
+            </div>
+          </div>
+        )}
+      </div>
     </motion.div>
   )
 }

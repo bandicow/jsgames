@@ -7,6 +7,10 @@ interface MusicState extends AudioState {
   recommendations: MusicTrack[]
   weatherMappings: WeatherMusicMapping[]
   isInitialized: boolean
+
+  // YouTube 플레이어 상태
+  youtubeTrackTitle?: string
+  youtubeTrackArtist?: string
   
   // 액션
   initializeMusic: (mood?: MoodToken) => void
@@ -23,6 +27,7 @@ interface MusicState extends AudioState {
   setShuffle: (shuffle: boolean) => void
   setAudioMode: (mode: 'music' | 'ambient' | 'both') => void
   clearError: () => void
+  setYoutubeTrackInfo: (title: string, artist: string) => void
 }
 
 // 날씨별 음악 매핑 데이터
@@ -160,6 +165,8 @@ export const useMusicStore = create<MusicState>((set, get) => ({
   recommendations: [],
   weatherMappings: WEATHER_MUSIC_MAPPINGS,
   isInitialized: false,
+  youtubeTrackTitle: undefined,
+  youtubeTrackArtist: undefined,
   
   // 음악 시스템 초기화 (자동 재생 포함)
   initializeMusic: async (mood?: MoodToken) => {
@@ -382,5 +389,10 @@ export const useMusicStore = create<MusicState>((set, get) => ({
   // 에러 클리어
   clearError: () => {
     set({ error: null })
+  },
+
+  // YouTube 트랙 정보 설정
+  setYoutubeTrackInfo: (title: string, artist: string) => {
+    set({ youtubeTrackTitle: title, youtubeTrackArtist: artist })
   }
 }))
