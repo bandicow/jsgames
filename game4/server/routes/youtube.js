@@ -24,7 +24,7 @@ const YOUTUBE_MUSIC_DB = {
     { videoId: 'CuklIb9d3fI', title: 'FANCY', artist: 'TWICE', thumbnail: 'https://i.ytimg.com/vi/CuklIb9d3fI/default.jpg' },
   ],
   'rain_lofi': [
-    { videoId: '9jFZdu0zTEA', title: '비', artist: '폴킴', thumbnail: 'https://i.ytimg.com/vi/aqVi8IImEwE/default.jpg' },
+    { videoId: 'aqVi8IImEwE', title: '비', artist: '폴킴', thumbnail: 'https://i.ytimg.com/vi/aqVi8IImEwE/default.jpg' },
     { videoId: 'v7bnOxV4jAc', title: '밤편지', artist: 'IU', thumbnail: 'https://i.ytimg.com/vi/v7bnOxV4jAc/default.jpg' },
     { videoId: 'D1PvIWdJ8xo', title: 'Blueming', artist: 'IU', thumbnail: 'https://i.ytimg.com/vi/D1PvIWdJ8xo/default.jpg' },
     { videoId: 'H69tJmsgd9I', title: 'Love poem', artist: 'IU', thumbnail: 'https://i.ytimg.com/vi/H69tJmsgd9I/default.jpg' },

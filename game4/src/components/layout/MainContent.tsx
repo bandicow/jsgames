@@ -1,6 +1,7 @@
 import { FC } from 'react'
 import MusicCard from '../music/MusicCard'
 import AIQuizCard from '../quiz/AIQuizCard'
+import HoroscopeCard from '../horoscope/HoroscopeCard'
 import WorldExplorer from '../world/WorldExplorer'
 import ActivityCard from '../activity/ActivityCard'
 import NewsCard from '../news/NewsCard'
@@ -102,6 +103,11 @@ const MainContent: FC = () => {
         {/* AI 퀴즈 카드 - Gemini 기반 */}
         <div className="md:col-span-2">
           <AIQuizCard />
+        </div>
+
+        {/* 운세 카드 - 신비로운 타로 디자인 */}
+        <div className="md:col-span-2">
+          <HoroscopeCard />
         </div>
 
         {/* 세상 둘러보기 카드 */}

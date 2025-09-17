@@ -15,7 +15,12 @@ interface YouTubeTrack {
 // 서버에서 YouTube 음악 데이터 가져오기
 const fetchYouTubeMusicFromServer = async (mood: string): Promise<YouTubeTrack[]> => {
   try {
-    const response = await fetch(`http://localhost:3005/api/youtube/search?mood=${mood}`)
+    // 현재 호스트에 따라 API URL 동적 설정
+    const apiBaseUrl = window.location.hostname === 'localhost'
+      ? 'http://localhost:3005'
+      : `http://${window.location.hostname}:3005`
+
+    const response = await fetch(`${apiBaseUrl}/api/youtube/search?mood=${mood}`)
     if (!response.ok) {
       throw new Error('Failed to fetch music')
     }
