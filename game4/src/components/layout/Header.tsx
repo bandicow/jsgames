@@ -13,7 +13,7 @@ const Header: FC<HeaderProps> = ({ isDarkMode, setIsDarkMode }) => {
           <div className="flex items-center space-x-4">
             <div className="text-2xl">🌦️</div>
             <h1 className="text-xl font-bold text-gradient">
-              하이브리드 날씨 앱
+              WeatherHub
             </h1>
           </div>
           
