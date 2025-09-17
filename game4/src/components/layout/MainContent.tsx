@@ -1,19 +1,14 @@
 import { FC } from 'react'
-import BaseCard from '../cards/BaseCard'
 import MusicCard from '../music/MusicCard'
 import AIQuizCard from '../quiz/AIQuizCard'
 import WorldExplorer from '../world/WorldExplorer'
 import ActivityCard from '../activity/ActivityCard'
 import NewsCard from '../news/NewsCard'
+import GameHub from '../games/GameHub'
 import { useWeatherStore } from '../../store/weatherStore'
 
 const MainContent: FC = () => {
   const { weather, currentMood } = useWeatherStore()
-
-  // 나머지 카드 데이터 (뉴스, 퀴즈, 액티비티는 별도 컴포넌트로 분리)
-  const cards = [
-    { id: 6, type: 'game', title: '🎮 미니게임', content: '간단한 브라우저 게임' },
-  ]
 
   // 무드 메시지 매핑
   const getMoodDisplay = () => {
@@ -124,10 +119,10 @@ const MainContent: FC = () => {
           <NewsCard />
         </div>
 
-        {/* 나머지 카드들 */}
-        {cards.map((card) => (
-          <BaseCard key={card.id} {...card} />
-        ))}
+        {/* 게임 허브 카드 */}
+        <div className="md:col-span-2">
+          <GameHub />
+        </div>
       </div>
     </main>
   )
